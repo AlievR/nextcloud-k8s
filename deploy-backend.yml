@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: backend-nextcloud
+  name: backend-nextcloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-nextcloud
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: backend-nextcloud
+    spec:
+      containers:
+      - image: 19995/nextcloud_back:1.0.0
+        name: backend-nextcloud
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: PODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: PODE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MONGO_URI
+            value: mongodb://root:example@192.168.0.103:27017
+          - name: PORT_LISTEN
+            value: "8080"
+          - name: SECRET_KEY
+            value: OsePCiT MinDigital
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
